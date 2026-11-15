@@ -11,26 +11,20 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo '=== Étape 1 : Récupération du code depuis GitHub ==='
-                checkout scmGit(
-                    branches: [[name: '*/main']],
-                    userRemoteConfigs: [[
-                        credentialsId: 'github-token',
-                        url: scm.getUserRemoteConfigs()[0].getUrl()
-                    ]]
-                )
+                checkout scm
             }
         }
 
         stage('Setup Virtual Environment') {
             steps {
                 echo '=== Étape 2 : Configuration de l\'environnement virtuel Python ==='
-                // Sur Windows PowerShell, on utilise 'bat' ou 'powershell'
                 bat '''
                     python --version
                     python -m venv venv
                     call venv\\Scripts\\activate
                     python -m pip install --upgrade pip
                     pip install -r requirements.txt
+                    pip install pytest-cov
                 '''
             }
         }
@@ -40,7 +34,7 @@ pipeline {
                 echo '=== Étape 3 : Exécution des tests avec pytest ==='
                 bat '''
                     call venv\\Scripts\\activate
-                    pytest --cov=app --cov-report=term-missing
+                    python -m pytest --cov=app --cov-report=term-missing
                 '''
             }
         }
