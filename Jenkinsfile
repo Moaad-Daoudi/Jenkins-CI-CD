@@ -34,25 +34,28 @@ pipeline {
         }
 
         stage('Run Tests') {
-            parallel {
-                stage('Test File 1') {
-                    steps {
-                        echo '=== Exécution de test_app.py ==='
+            when {
+                not {
+                    changeset "README.md"
+                }
+            }
+
+            steps {
+                echo '=== Étape 3 : Exécution des tests en parallèle ==='
+                parallel(
+                    "Test Principal": {
                         bat '''
                             call venv\\Scripts\\activate
-                            python -m pytest test_app.py --cov=app --cov-report=term-missing
+                            pytest test_app.py --cov=app --cov-report=term-missing
                         '''
-                    }
-                }
-                stage('Test File 2') {
-                    steps {
-                        echo '=== Exécution de test_app_2.py ==='
+                    },
+                    "Test Secondaire": {
                         bat '''
                             call venv\\Scripts\\activate
-                            python -m pytest test_app_2.py -v
+                            pytest test_app_2.py
                         '''
                     }
-                }
+                )
             }
         }
 
