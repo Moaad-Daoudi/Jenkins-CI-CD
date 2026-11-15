@@ -35,11 +35,21 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                echo '=== Étape 3 : Exécution des tests avec pytest ==='
-                bat '''
-                    call venv\\Scripts\\activate
-                    python -m pytest --cov=app --cov-report=term-missing
-                '''
+                echo '=== Étape 3 : Exécution des tests en parallèle ==='
+                parallel(
+                    "Test Principal": {
+                        bat '''
+                            call venv\\Scripts\\activate
+                            pytest test_app.py --cov=app --cov-report=term-missing
+                        '''
+                    },
+                    "Test Secondaire": {
+                        bat '''
+                            call venv\\Scripts\\activate
+                            pytest test_app_2.py
+                        '''
+                    }
+                )
             }
         }
 
