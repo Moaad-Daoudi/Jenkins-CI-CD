@@ -39,23 +39,25 @@ pipeline {
                     changeset "README.md"
                 }
             }
-
-            steps {
-                echo '=== Étape 3 : Exécution des tests en parallèle ==='
-                parallel(
-                    "Test Principal": {
+            parallel {
+                stage('Test File 1') {
+                    steps {
+                        echo '=== Exécution de test_app.py ==='
                         bat '''
                             call venv\\Scripts\\activate
-                            pytest test_app.py --cov=app --cov-report=term-missing
-                        '''
-                    },
-                    "Test Secondaire": {
-                        bat '''
-                            call venv\\Scripts\\activate
-                            pytest test_app_2.py
+                            python -m pytest test_app.py --cov=app --cov-report=term-missing
                         '''
                     }
-                )
+                }
+                stage('Test File 2') {
+                    steps {
+                        echo '=== Exécution de test_app_2.py ==='
+                        bat '''
+                            call venv\\Scripts\\activate
+                            python -m pytest test_app_2.py -v
+                        '''
+                    }
+                }
             }
         }
 
